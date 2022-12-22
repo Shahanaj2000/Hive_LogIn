@@ -14,6 +14,9 @@ class UserModel {
   
   @HiveField(2)
   final String password;
+
+  @HiveField(3)
+  final String confPassword;
   
 
   UserModel({required this.email, required this.password}) {

@@ -141,9 +141,9 @@ class SignUpScreen extends StatelessWidget {
 
     if (emial != '' && password != '' && confirmPassword != '') {
       if (isEmailValidated == true) {
-        final isPasswordValidate = checkPassword(emial, confirmPassword);
+        final isPasswordValidate = checkPassword(emial, password);
         if (isPasswordValidate == true) {
-          final user = UserModel(email: emial, password: password);
+          final user = UserModel(email: emial, password: password, );
           await DBFunctions.instance.userSignup(user);
           Get.back();
           Get.snackbar('Success', 'Account created');
