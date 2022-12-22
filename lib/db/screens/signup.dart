@@ -1,5 +1,8 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_login/db/functions/data_fucnctions.dart';
+import 'package:hive_login/db/models/data_models.dart';
 import 'package:hive_login/db/screens/login.dart';
 
 
@@ -91,7 +94,8 @@ class SignUpScreen extends StatelessWidget {
                   )
                 ),
                 onPressed: () {
-                  Get.to(() => SignUpScreen());
+                  //Get.to(() => SignUpScreen());
+                  validateSignup();
                 },
                 child: const Text(
                   "SignUp", 
@@ -125,4 +129,61 @@ class SignUpScreen extends StatelessWidget {
       ),
     );
   }
+
+  //! Vlidate SignUp
+  Future<void> validateSignup() async {
+
+    final emial = _emailControllers.text.trim();
+    final password = _passwordControllers.text.trim();
+    final confirmPassword = _conformPasswordControlllers.text.trim();
+
+    final isEmailValidated = EmailValidator.validate(emial);
+
+    if (emial != '' && password != '' && confirmPassword != '') {
+      if (isEmailValidated == true) {
+        final isPasswordValidate = checkPassword(emial, confirmPassword);
+        if (isPasswordValidate == true) {
+          final user = UserModel(email: emial, password: password);
+          await DBFunctions.instance.userSignup(user);
+          Get.back();
+          Get.snackbar('Success', 'Account created');
+
+          print('Success');
+        } 
+      } else {
+          Get.snackbar(
+            'Error', 'Please provide a valid email',
+            colorText: Colors.red,
+            backgroundColor: Colors.white,
+          );
+      } /*else {
+          'Error', 'Fielde Cannot be empty',
+           colorText: Colors.red,
+           backgroundColor: Colors.white,
+    } */
+  }
 }
+
+      bool checkPassword(String pass, String confPpass) {
+        if (pass == confPpass) {
+          if (pass.length < 6) {
+            Get.snackbar(
+              'Error', 'Password must contain 6 characters or more',
+              colorText: Colors.red,
+              backgroundColor: Colors.white,
+            );
+            return false;
+          } else {
+            return true;
+          }    
+        } else {
+          Get.snackbar(
+            'Password mismatch', 'Password and Confirm password are not same',
+            colorText: Colors.red,
+            backgroundColor: Colors.white,
+          );
+          return false;
+        }
+      }
+    }
+  

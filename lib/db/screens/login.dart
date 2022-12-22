@@ -1,7 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_login/db/functions/data_fucnctions.dart';
+import 'package:hive_login/db/models/data_models.dart';
+import 'package:hive_login/db/screens/home_Screen.dart';
 import 'package:hive_login/db/screens/signup.dart';
+
+
 
 class LoginScreen extends StatelessWidget {
     LoginScreen({super.key});
@@ -73,8 +78,10 @@ class LoginScreen extends StatelessWidget {
                     ),
                   )
                 ),
-                onPressed: () {
-                  Get.to(() => LoginScreen());
+                onPressed: () async {
+                  //Get.to(() => LoginScreen());
+                  final list = await DBFunctions.instance.getUsers();
+                  checkUser(list);
                 },
                 child: const Text('LOGIN'),
               ),
@@ -91,4 +98,58 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
+  // TODO CheckUser
+Future<void> checkUser(List<UserModel> userList) async {  
+
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
+
+  bool isUserFound = false;
+
+  final isValidated = await validateLogin(email, password);
+
+  if (isValidated == true) {
+    await Future.forEach(userList, (user) {
+      if (user.email == email && user.password == password) {
+        isUserFound = true;
+      } else {
+        isUserFound = false;
+      }
+    });
+
+    if (isUserFound == true) {
+      Get.offAll(() => HomeScreen(email: email));
+      Get.snackbar('Success', 'LoggedIn as $email');
+    } 
+      
+    else {
+      Get.snackbar(
+        'Error', 'Incorrect email oe password',
+        colorText: Colors.red,
+        backgroundColor: Colors.white,
+      );
+    }
+
+   /*  else {
+      Get.snackbar(
+        'Error', 'Feilds cannot be empty',
+         colorText: Colors.red,
+         backgroundColor: Colors.white,
+
+      );
+    } */ 
+
+  }
 }
+  //! VlidateLogIn
+  Future<bool> validateLogin(String email, String password) async {
+      if (email != '' && password != '') {
+        return true;
+      } else {
+        return false;
+      }
+  }
+}
+
+
